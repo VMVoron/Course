@@ -1,0 +1,82 @@
+---
+title: "Wall.get"
+author: "VMVoron"
+date: '2022-06-21'
+output: html_document
+---
+
+This script is aimed to get the wall posts from different VK communities
+
+```{r}
+
+user_id <- as.numeric(readline(prompt = "Enter your id VK: ")) #receiving ID VKhead
+#user_id <- 00000000
+cat("Your ID is", user_id)
+access_token <-(readline(prompt = "Enter your Access Token VK: ")) #receiving access code
+#access_token <- "0a0a0a00a0a0a0a"
+cat("Your Access Token is", access_token)
+owner_id <-(readline(prompt = "Enter your owner ID: ")) 
+#owner_id <-as.numeric(-23904) #receiving domain
+cat("Your owner_id is", owner_id)
+count <- as.character(readline(prompt = "Enter the count of posts per one request (sample)"))
+#count <- as.character(100)
+counter <- as.numeric(count)
+cat("count =", count)
+offset <- as.character(readline(prompt = "Enter the offset of samples "))
+#offset <- as.character(100)
+cat("offset =", count)
+num_request <- as.numeric(readline(prompt = "Enter the number of requests "))
+#num_request <- as.numeric(70)
+cat("num_request =", num_request)
+total=counter*num_request
+cat("Records = ", total)
+```
+###########################################
+#receiving the data
+```{r}
+library(RCurl)
+library(jsonlite) 
+i=0
+off=0
+new = new[FALSE]
+new <- data.frame()
+
+for (i in 1:num_request){
+j <- as.character(off)
+d <- postForm('https://api.vk.com/method/users.get',
+             user_id=print(user_id), 
+             access_token=print(access_token),
+             v=5.131,
+             owner_id=print(owner_id),
+             count=print(count),
+             offset=print(off))
+rd <- fromJSON(d, flatten = TRUE)
+typeof(rd)
+d=as.data.frame(rd, optional = TRUE) # data frame 
+typeof(d)
+#if (d$response.items.text > 1) 
+#{attach(d)}
+md<-data.frame(d$response.count, d$response.items.id, d$response.items.text, d$response.items.comments.count,
+              d$response.items.date, d$response.items.views.count,
+              d$response.items.from_id, d$response.items.hash,
+              d$response.items.likes.count,
+              d$response.items.marked_as_ads, d$response.items.owner_id,
+              d$response.items.post_source.platform,
+              d$response.items.reposts.count)
+new <- rbind(new,md)
+#q<-(response.items.id, response.items.likes.count, response.items.text)
+#head(d$response.items.text)
+#connected_tibble <- left_join (new, d)
+off=off+100
+}
+```
+Saving the results 
+```{r}
+#save(md, new, d, rd, file="md_new_d_rd.Rda")
+dataframe <- new
+head(new)
+new <- apply(new,2,as.character)
+write.csv2(dataframe, "kalin11.csv") #row.names = TRUE
+save(dataframe,file="dataframe.Rda")
+```
+
