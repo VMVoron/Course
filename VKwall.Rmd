@@ -68,6 +68,7 @@ new <- rbind(new,md)
 #head(d$response.items.text)
 #connected_tibble <- left_join (new, d)
 off=off+100
+Sys.sleep(0.33)
 }
 ```
 Saving the results 
